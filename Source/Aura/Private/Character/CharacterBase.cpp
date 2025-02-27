@@ -7,9 +7,18 @@ ACharacterBase::ACharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 }
 
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ACharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	
+	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocket);
+	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

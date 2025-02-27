@@ -14,6 +14,15 @@ class AURA_API ACharacterBase : public ACharacter
 public:
 	ACharacterBase();
 
+	
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void PostInitializeComponents() override;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Blueprintable, Category="Combat")
+	FName WeaponSocket;
+	
+	UPROPERTY(EditAnywhere, Category="Combat")
+	TObjectPtr<USkeletalMeshComponent> Weapon;
 };
