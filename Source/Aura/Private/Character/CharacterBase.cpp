@@ -15,6 +15,12 @@ void ACharacterBase::BeginPlay()
 	Super::BeginPlay();
 }
 
+ void ACharacterBase:: OnConstruction(const FTransform& Transform)
+{
+	//Call this to attach it on editor preview, as PostInitializeComponents is just called when running game
+	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocket);
+}
+
 void ACharacterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();

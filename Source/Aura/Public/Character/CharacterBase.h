@@ -18,6 +18,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void PostInitializeComponents() override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Blueprintable, Category="Combat")
