@@ -6,10 +6,10 @@
 
 void AEnemyCharacter::Highlight()
 {
-
+	bHighlighted = true;
 }
 
 void AEnemyCharacter::UnHighlight()
 {
-
+	bHighlighted = false;
 }

@@ -18,4 +18,7 @@ class AURA_API AEnemyCharacter : public ACharacterBase, public IHighlightable
 public:
 	virtual void Highlight() override;
 	virtual void UnHighlight() override;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bHighlighted = false; //Debug purpose, TODO move to interface to add general debug info
 };
