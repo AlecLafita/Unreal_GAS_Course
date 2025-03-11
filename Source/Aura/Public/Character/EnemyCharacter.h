@@ -16,9 +16,10 @@ class AURA_API AEnemyCharacter : public ACharacterBase, public IHighlightable
 	GENERATED_BODY()
 
 public:
+	AEnemyCharacter();
+	
+	virtual void PostInitializeComponents() override;
+
 	virtual void Highlight() override;
 	virtual void UnHighlight() override;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool bHighlighted = false; //Debug purpose, TODO move to interface to add general debug info
 };
