@@ -3,9 +3,12 @@
 
 #include "Character/PlayerCharacter.h"
 
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Player/AuraPlayerState.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -25,4 +28,33 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
+}
+
+void APlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	//Init ability actor info for Server
+	InitAbilityActorInfo();
+}
+
+void APlayerCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	//Init ability actor info for Client
+	/* As the player state owns the ASC we need to do it here to make sure the player state is valid. Otherwise, if ASC
+	 * was directly owned by the pawn it would be enough to do it at AcknowledgePossesion, after controller has been
+	 * set and ack for the pawn */
+
+	InitAbilityActorInfo();
+}
+
+void APlayerCharacter::InitAbilityActorInfo()
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
+	AttributeSet = AuraPlayerState->GetAttributeSet();
+	AbilitySystemComponent->InitAbilityActorInfo(AuraPlayerState, this);
 }

@@ -19,8 +19,13 @@ class AURA_API APlayerCharacter : public ACharacterBase
 
 public:
 	APlayerCharacter();
+
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 	
 private:
+	void InitAbilityActorInfo(); 
+	
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	TObjectPtr<UCameraComponent> CameraComponent;
 

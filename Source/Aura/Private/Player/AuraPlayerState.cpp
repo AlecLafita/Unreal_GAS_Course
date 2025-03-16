@@ -15,7 +15,10 @@ AAuraPlayerState::AAuraPlayerState()
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
-
+	/* OwnerActor's Owner must be the controller, but for the state it's automatically set to it
+	 * If we had another owner actor that's not a player state, with the mixed replication mode we should call
+	 * SetOwner to set its owner to the Controller */
+	
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>("AttributeSet");
 }
 
