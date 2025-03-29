@@ -4,11 +4,26 @@
 #include "UI/HUD/BaseHUD.h"
 
 #include "UI/Widget/BaseUserWidget.h"
+#include "UI/WisgetController/OverlayWidgetController.h"
 
-void ABaseHUD::BeginPlay()
+UOverlayWidgetController* ABaseHUD::GetOverlayWidgetController(const FWidgetControllerParams& WidgetControllerParams)
 {
-	Super::BeginPlay();
+	if (OverlayWidgetController == nullptr)
+	{
+		OverlayWidgetController = NewObject<UOverlayWidgetController>(this, OverlayWidgetControllerClass);
+		OverlayWidgetController->SetWidgetControllerParams(WidgetControllerParams);
+	}
 
-	UUserWidget* Widget = CreateWidget<UUserWidget>(GetWorld(), OverlayWidgetClass);
-	Widget->AddToViewport();
+	return OverlayWidgetController;
+}
+
+void ABaseHUD::InitOverlay(APlayerController* PlayerController, APlayerState* PlayerState, UAbilitySystemComponent* AbilitySystemComponent, UAttributeSet* AuraAttributeSet)
+{
+	checkf(OverlayWidgetClass, TEXT("Overlay Widget Class uninitialized"));
+	checkf(OverlayWidgetControllerClass, TEXT("Overlay Widget Controller Class uninitialized"));
+	
+	OverlayWidget = CreateWidget<UBaseUserWidget>(GetWorld(), OverlayWidgetClass); 
+
+	OverlayWidget->SetWidgetController(GetOverlayWidgetController(FWidgetControllerParams{PlayerController, PlayerState, AbilitySystemComponent, AuraAttributeSet }));
+	OverlayWidget->AddToViewport();
 }
