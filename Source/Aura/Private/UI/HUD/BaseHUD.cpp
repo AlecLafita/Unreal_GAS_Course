@@ -24,6 +24,9 @@ void ABaseHUD::InitOverlay(APlayerController* PlayerController, APlayerState* Pl
 	
 	OverlayWidget = CreateWidget<UBaseUserWidget>(GetWorld(), OverlayWidgetClass); 
 
-	OverlayWidget->SetWidgetController(GetOverlayWidgetController(FWidgetControllerParams{PlayerController, PlayerState, AbilitySystemComponent, AuraAttributeSet }));
+	UOverlayWidgetController* WidgetController = GetOverlayWidgetController(FWidgetControllerParams{PlayerController, PlayerState, AbilitySystemComponent, AuraAttributeSet }); 
+	OverlayWidget->SetWidgetController(WidgetController);
+	WidgetController->BroadcastInitialValues();
+	
 	OverlayWidget->AddToViewport();
 }
