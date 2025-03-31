@@ -60,11 +60,14 @@ void APlayerCharacter::InitAbilityActorInfo()
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 	AbilitySystemComponent->InitAbilityActorInfo(AuraPlayerState, this);
 
-	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	if (IsLocallyControlled()) //Doing this here will make to reinitialize when the player is respawned, which depending on the game may not be desired but rather to be done at the controller for example 
 	{
-		if (ABaseHUD* BaseHUD = Cast<ABaseHUD>(AuraPlayerController->GetHUD()))
+		if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 		{
-			BaseHUD->InitOverlay(AuraPlayerController, AuraPlayerState, AbilitySystemComponent, AttributeSet);
+			if (ABaseHUD* BaseHUD = Cast<ABaseHUD>(AuraPlayerController->GetHUD()))
+			{
+				BaseHUD->InitOverlay(AuraPlayerController, AuraPlayerState, AbilitySystemComponent, AttributeSet);
+			}
 		}
 	}
 }
