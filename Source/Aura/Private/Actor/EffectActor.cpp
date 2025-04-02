@@ -28,8 +28,9 @@ void AEffectActor::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	{
 		const UAuraAttributeSet* AuraAttributeSet = Cast<UAuraAttributeSet>(ASCInterface->GetAbilitySystemComponent()->GetAttributeSet(UAuraAttributeSet::StaticClass()));
 		check(AuraAttributeSet);
-		UAuraAttributeSet* MutableAuraAttributeSet = const_cast<UAuraAttributeSet*>(AuraAttributeSet);
-		MutableAuraAttributeSet->SetHealth(AuraAttributeSet->GetHealth() + 25.f); //const cast needed as attributes should just be changed through gameplay effects
+		UAuraAttributeSet* MutableAuraAttributeSet = const_cast<UAuraAttributeSet*>(AuraAttributeSet);//const cast needed as attributes should just be changed through gameplay effects
+		MutableAuraAttributeSet->SetHealth(AuraAttributeSet->GetHealth() + 25.f); 
+		MutableAuraAttributeSet->SetMana(std::max(AuraAttributeSet->GetMana() - 10.f,0.f));
 		Destroy();
 	}
 }
