@@ -3,7 +3,41 @@
 
 #include "AbilitySystem/AuraAttributeSet.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameFramework/Character.h"
+#include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
+
+FEffectProperties::FEffectProperties(const FGameplayEffectModCallbackData& Data)
+{
+	//Source = causer of the effect, Target = target of the effect (owner of this AttributeSet)
+	EffectContextHandle = Data.EffectSpec.GetContext();
+	SourceInfo.ASC = EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
+	check(SourceInfo.ASC);
+	
+	SourceInfo.AvatarActor = SourceInfo.ASC->GetAvatarActor();
+	SourceInfo.Controller = SourceInfo.ASC->AbilityActorInfo->PlayerController.Get();
+	if (SourceInfo.Controller == nullptr && SourceInfo.Controller != nullptr)
+	{
+		if (const APawn* Pawn = Cast<APawn>(SourceInfo.AvatarActor))
+		{
+			SourceInfo.Controller = Pawn->GetController();
+		}
+	}
+
+	if (SourceInfo.Controller != nullptr)
+	{
+		SourceInfo.Character = Cast<ACharacter>(SourceInfo.Controller->GetPawn());
+	}
+
+	if (Data.Target.AbilityActorInfo.IsValid())
+	{
+		TargetInfo.AvatarActor = Data.Target.GetAvatarActor();
+		TargetInfo.Controller = Data.Target.AbilityActorInfo->PlayerController.Get();
+		TargetInfo.Character = Cast<ACharacter>(TargetInfo.AvatarActor);
+		TargetInfo.ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetInfo.AvatarActor);
+	}
+}
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -33,6 +67,13 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
 	else if (Attribute == GetManaAttribute())
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMana());
+}
+
+void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+{
+	Super::PostGameplayEffectExecute(Data);
+
+	FEffectProperties EffectProperties(Data);
 }
 
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
