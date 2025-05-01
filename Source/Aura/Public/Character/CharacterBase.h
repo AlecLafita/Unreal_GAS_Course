@@ -26,6 +26,8 @@ protected:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void PostInitializeComponents() override;
+
+	virtual void InitAbilityActorInfo() {}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Blueprintable, Category="Combat")
 	FName WeaponSocket;

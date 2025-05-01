@@ -59,6 +59,7 @@ void APlayerCharacter::InitAbilityActorInfo()
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 	AbilitySystemComponent->InitAbilityActorInfo(AuraPlayerState, this);
+	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
 	if (IsLocallyControlled()) //Doing this here will make to reinitialize when the player is respawned, which depending on the game may not be desired but rather to be done at the controller for example 
 	{
