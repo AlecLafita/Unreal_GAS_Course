@@ -30,9 +30,12 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddUObject(this, &UOverlayWidgetController::MaxManaChanged);
 
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTagsDelegate.AddLambda(
-	[](const FGameplayTagContainer& AssetTags)
+	[this](const FGameplayTagContainer& AssetTags)
 		{
-			//TODO use MessageWidgetDataTable		
+			for (const FGameplayTag& Tag : AssetTags)
+			{
+				FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable, Tag);
+			}
 		}
 	);
 }

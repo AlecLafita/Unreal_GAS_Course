@@ -63,6 +63,15 @@ protected:
 	void ManaChanged(const FOnAttributeChangeData& Data) const;
 	void MaxManaChanged(const FOnAttributeChangeData& Data) const;
 
+	template<typename TDataTableRow>
+	TDataTableRow* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag); //TODO move to static library
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Widget Data")
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
 };
+
+template <typename TDataTableRow>
+TDataTableRow* UOverlayWidgetController::GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag)
+{
+	return DataTable->FindRow<TDataTableRow>(Tag.GetTagName());
+}
