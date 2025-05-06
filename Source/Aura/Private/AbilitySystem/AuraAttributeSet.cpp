@@ -58,7 +58,7 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
 }
 
-//This should just be used to clamp values and similar operations, never for game logic! 
+//This should just be used to clamp values and similar operations, never for game logic! It just changes the return value when querying the modifier, so it will change the final attribute and not the base value!
 void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
@@ -74,6 +74,12 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	Super::PostGameplayEffectExecute(Data);
 
 	FEffectProperties EffectProperties(Data);
+
+	//Need to clamp again to actually apply the clamp to the attribute final values
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
+	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
+		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 }
 
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
