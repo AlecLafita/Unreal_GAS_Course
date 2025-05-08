@@ -28,7 +28,7 @@ public:
 
 protected:
 	//As we want to keep GAS data between player respawn, we don't have the ownership at the player class but at the state, which will persist between different player instances 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY()
