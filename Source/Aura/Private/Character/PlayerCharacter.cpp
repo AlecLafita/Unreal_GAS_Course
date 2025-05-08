@@ -38,6 +38,9 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 
 	//Init ability actor info for Server
 	InitAbilityActorInfo();
+
+	//Don't need to call it at the client as it's replicated at the client
+	InitializePrimaryAttributes();
 }
 
 void APlayerCharacter::OnRep_PlayerState()
