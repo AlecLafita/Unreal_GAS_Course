@@ -40,12 +40,18 @@ void ACharacterBase::PostInitializeComponents()
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void ACharacterBase::InitializePrimaryAttributes() const
+void ACharacterBase::InitializeDefaultAttributes() const
+{
+	ApplEffectToSelf(DefaultPrimaryAttributes, 1.f);
+	ApplEffectToSelf(DefaultSecondaryAttributes, 1.f);
+}
+
+void ACharacterBase:: ApplEffectToSelf(const TSubclassOf<UGameplayEffect>& GameplayEffectClass, float Level) const
 {
 	check(IsValid(AbilitySystemComponent))
-	check(IsValid(DefaultPrimaryAttributes))
+	check(IsValid(GameplayEffectClass))
 
 	const FGameplayEffectContextHandle ContextHandle = AbilitySystemComponent->MakeEffectContext();
-	const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultPrimaryAttributes, 1.f,ContextHandle);
+	const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffectClass, Level,ContextHandle);
 	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), AbilitySystemComponent);
 }
