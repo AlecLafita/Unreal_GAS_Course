@@ -23,8 +23,15 @@ public:
 	virtual void UnHighlight() override;
 	/* ~IHighlightable */
 
+	/* ICombatInterface */
+	virtual int32 GetCombatLevel() const override {return Level;}
+	/* ~ICombatInterface */
+
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
-	virtual void InitAbilityActorInfo() override; 
+	virtual void InitAbilityActorInfo() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,	Category = "Catergory Class Defaults")
+	int32 Level = 1; //Don't replicate until we  it on client side
 };

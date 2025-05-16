@@ -23,9 +23,13 @@ class AURA_API AAuraPlayerState :
 public:
 	AAuraPlayerState();
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const;
 
+	FORCEINLINE int32 GetCombatLevel() const {return Level;}
+	
 protected:
 	//As we want to keep GAS data between player respawn, we don't have the ownership at the player class but at the state, which will persist between different player instances 
 	UPROPERTY(VisibleAnywhere)
@@ -33,4 +37,12 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+private:
+
+	UPROPERTY(VisibleAnywhere, Replicated = OnRep_Level)
+	int32 Level = 1;
+
+	UFUNCTION()
+	void OnRep_Level(int32 OldLevel);
 };
