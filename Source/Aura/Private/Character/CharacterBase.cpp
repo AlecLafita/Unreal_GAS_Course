@@ -51,7 +51,8 @@ void ACharacterBase:: ApplEffectToSelf(const TSubclassOf<UGameplayEffect>& Gamep
 	check(IsValid(AbilitySystemComponent))
 	check(IsValid(GameplayEffectClass))
 
-	const FGameplayEffectContextHandle ContextHandle = AbilitySystemComponent->MakeEffectContext();
+	FGameplayEffectContextHandle ContextHandle = AbilitySystemComponent->MakeEffectContext();
+	ContextHandle.AddSourceObject(this);
 	const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffectClass, Level,ContextHandle);
 	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), AbilitySystemComponent);
 }
