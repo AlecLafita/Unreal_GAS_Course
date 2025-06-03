@@ -3,3 +3,12 @@
 
 #include "UI/WisgetController/AttributeMenuWidgetController.h"
 
+void UAttributeMenuWidgetController::BroadcastInitialValues()
+{
+
+}
+
+void UAttributeMenuWidgetController::BindCallbacksToDependencies()
+{
+
+}
