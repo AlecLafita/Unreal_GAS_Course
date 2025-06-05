@@ -8,18 +8,39 @@
 #include "UI/HUD/BaseHUD.h"
 #include "UI/WisgetController/BaseWidgetController.h"
 
-UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
+
+ABaseHUD* CreateWidgetControllerParams(const UObject* WorldContextObject, FWidgetControllerParams& OutParams)
 {
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
 	{
-		if (ABaseHUD* BaseHUD = Cast<ABaseHUD>(PC->GetHUD()))
+		if (ABaseHUD* HUD = Cast<ABaseHUD>(PC->GetHUD()))
 		{
 			AAuraPlayerState* PS = PC->GetPlayerState< AAuraPlayerState>();
 			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
 			UAttributeSet* AS = PS->GetAttributeSet();
-			return BaseHUD->GetOverlayWidgetController({PC, PS, ASC, AS});
+			OutParams = FWidgetControllerParams{ PC, PS, ASC, AS };
+			return HUD;
 		}
 	}
+
+	return nullptr;
+}
+
+UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WidgetParams;
+	if (ABaseHUD * HUD = CreateWidgetControllerParams(WorldContextObject, WidgetParams))
+		return HUD->GetOverlayWidgetController(WidgetParams);
+
+	return nullptr;
+}
+
+
+UAttributeMenuWidgetController* UAuraAbilitySystemLibrary::GetAttributeMenuWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WidgetParams;
+	if (ABaseHUD * HUD = CreateWidgetControllerParams(WorldContextObject, WidgetParams))
+		return HUD->GetAttributeMenuWidgetController(WidgetParams);
 
 	return nullptr;
 }

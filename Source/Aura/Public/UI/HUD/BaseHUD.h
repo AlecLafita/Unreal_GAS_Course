@@ -8,6 +8,7 @@
 #include "BaseHUD.generated.h"
 
 class UOverlayWidgetController;
+class UAttributeMenuWidgetController;
 class UBaseUserWidget;
 struct FWidgetControllerParams;
 
@@ -19,15 +20,17 @@ class AURA_API ABaseHUD : public AHUD
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY()
-	TObjectPtr<UBaseUserWidget> OverlayWidget;
+public:	
 
 	UOverlayWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& WidgetControllerParams);
+	UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const FWidgetControllerParams& WidgetControllerParams);
 
 	void InitOverlay(APlayerController* PlayerController, APlayerState* PlayerState, UAbilitySystemComponent* AbilitySystemComponent, UAttributeSet* AuraAttributeSet);
 	
 private:
+	UPROPERTY()
+	TObjectPtr<UBaseUserWidget> OverlayWidget;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UBaseUserWidget> OverlayWidgetClass;
 
@@ -36,4 +39,11 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
+	
+	
+	UPROPERTY()
+	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuWidgetController;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UAttributeMenuWidgetController> AttributeMenuWidgetControllerClass;
 };
