@@ -51,6 +51,8 @@ struct FEffectProperties
 	FEffectPropertiesInfo TargetInfo;
 };
 
+using FGameplayAttributeFunctionPointer = FGameplayAttribute(*)();
+
 /**
  * 
  */
@@ -65,6 +67,8 @@ public:
 
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
+
+	TMap<FGameplayTag, FGameplayAttributeFunctionPointer> TagsToAttributes;
 	
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Strength, Category = "Primary Attributes");
 	FGameplayAttributeData Strength;
@@ -177,5 +181,4 @@ public:
 
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
-	
 };
