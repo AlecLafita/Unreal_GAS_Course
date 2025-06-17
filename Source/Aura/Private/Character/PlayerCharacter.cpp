@@ -41,6 +41,8 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 
 	//Don't need to call it at the client as it's replicated there
 	InitializeDefaultAttributes();
+
+	AddCharacterAbilities();
 }
 
 void APlayerCharacter::OnRep_PlayerState()
