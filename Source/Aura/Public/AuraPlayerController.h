@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GameplayTagContainer.h"
 #include "AuraPlayerController.generated.h"
 
+class UInputConfig;
 struct FInputActionValue;
 class IHighlightable;
 class UInputAction;
@@ -40,4 +42,11 @@ private:
 
 	TScriptInterface<IHighlightable> PreviousHightlightable = nullptr;
 	TScriptInterface<IHighlightable> CurrentHightlightable = nullptr;
+
+	void AbilityInputTagPressed(const FGameplayTag InputTag);
+	void AbilityInputTagReleased(const FGameplayTag InputTag);
+	void AbilityInputTagHeld(const FGameplayTag InputTag);
+	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputConfig> InputConfig;
 };
