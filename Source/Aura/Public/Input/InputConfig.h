@@ -31,5 +31,5 @@ public:
 	const UInputAction* FindAbilityInputAction(const FGameplayTag AbilityTag) const;
 	
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite)
-	TArray<FBaseInputAction> InputActions; //TODO Probably better to have a map
+	TArray<FBaseInputAction> InputActions; //TODO Probably better to have a map and some accessor functions
 };
