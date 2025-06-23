@@ -12,6 +12,7 @@ struct FInputActionValue;
 class IHighlightable;
 class UInputAction;
 class UInputMappingContext;
+class UAuraAbilitySystemComponent;
 
 /**
  * 
@@ -49,4 +50,8 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputConfig> InputConfig;
+
+	UPROPERTY()
+	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent;
+	UAuraAbilitySystemComponent* GetASC();
 };
