@@ -4,14 +4,18 @@
 #include "AuraPlayerController.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AuraGameplayTags.h"
 #include "EnhancedInputSubsystems.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Components/SplineComponent.h"
 #include "Input/BaseEnhancedInputComponent.h"
 #include "Interaction/Highlightable.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+
+	MouseFollowSpline = CreateDefaultSubobject<USplineComponent>("MouseFollowSpline");
 }
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
@@ -92,7 +96,10 @@ void AAuraPlayerController::CursorTrace()
 
 void AAuraPlayerController::AbilityInputTagPressed(const FGameplayTag InputTag)
 {
-	GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Red, *InputTag.ToString());
+	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
+	{
+		bAutoRunning = false;
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
@@ -103,8 +110,32 @@ void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagHeld(const FGameplayTag InputTag)
 {
-	if (UAuraAbilitySystemComponent* ASC = GetASC())
-		ASC->AbilityInputTagHeld(InputTag);
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) || IsTargeting())
+	{
+		if (UAuraAbilitySystemComponent* ASC = GetASC())
+			ASC->AbilityInputTagHeld(InputTag);
+	}
+	else
+	{
+		MouseFollowTime += GetWorld()->GetDeltaSeconds();
+
+		FHitResult CursorHit;
+		if (GetHitResultUnderCursor(ECC_Visibility, false, CursorHit))
+		{
+			CachedDestination = CursorHit.ImpactPoint;
+		}
+
+		if (APawn* ControlledPawn = GetPawn<APawn>())
+		{
+			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+			ControlledPawn->AddMovementInput(WorldDirection);
+		}
+	}
+}
+
+ bool AAuraPlayerController::IsTargeting() const
+{
+	return CurrentHightlightable != nullptr;
 }
 
 UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()

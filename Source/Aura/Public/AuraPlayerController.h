@@ -13,6 +13,7 @@ class IHighlightable;
 class UInputAction;
 class UInputMappingContext;
 class UAuraAbilitySystemComponent;
+class USplineComponent;
 
 /**
  * 
@@ -47,6 +48,7 @@ private:
 	void AbilityInputTagPressed(const FGameplayTag InputTag);
 	void AbilityInputTagReleased(const FGameplayTag InputTag);
 	void AbilityInputTagHeld(const FGameplayTag InputTag);
+	 bool IsTargeting() const;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputConfig> InputConfig;
@@ -54,4 +56,19 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent;
 	UAuraAbilitySystemComponent* GetASC();
+	
+	FVector CachedDestination = FVector::ZeroVector;
+
+	float MouseFollowTime = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	float ShortPressThreshold = 0.5f;
+
+	bool bAutoRunning = false;
+
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	float AutoRunAcceptanceRadius = 50.f;
+
+	UPROPERTY(VisibleAnywhere, Category="Input")
+	TObjectPtr<USplineComponent> MouseFollowSpline;
 };
