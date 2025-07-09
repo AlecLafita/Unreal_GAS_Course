@@ -6,6 +6,8 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AuraGameplayTags.h"
 #include "EnhancedInputSubsystems.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Components/SplineComponent.h"
 #include "Input/BaseEnhancedInputComponent.h"
@@ -15,7 +17,7 @@ AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
 
-	MouseFollowSpline = CreateDefaultSubobject<USplineComponent>("MouseFollowSpline");
+	CursorFollowSpline = CreateDefaultSubobject<USplineComponent>("CursorFollowSpline");
 }
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
@@ -98,44 +100,61 @@ void AAuraPlayerController::AbilityInputTagPressed(const FGameplayTag InputTag)
 {
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{
+		bPressedTarget = CurrentHightlightable != nullptr;
 		bAutoRunning = false;
 	}
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 {
-	if (UAuraAbilitySystemComponent* ASC = GetASC())
-		ASC->AbilityInputTagReleased(InputTag);
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) || bPressedTarget)
+	{
+		if (UAuraAbilitySystemComponent* ASC = GetASC())
+			ASC->AbilityInputTagReleased(InputTag);
+	}
+	else
+	{
+		const APawn* ControlledPawn = GetPawn<APawn>();
+		if (CursorFollowTime <= ShortPressThreshold && ControlledPawn)
+		{
+			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CursorFollowDestination))
+			{
+				CursorFollowSpline->ClearSplinePoints();
+				for (const FVector& PathPoint : NavPath->PathPoints)
+				{
+					CursorFollowSpline->AddSplinePoint(PathPoint, ESplineCoordinateSpace::World);
+					DrawDebugSphere(GetWorld(), PathPoint, 8.f, 8, FColor::Green, false, 5.f);
+				}
+				bAutoRunning = true;
+			}
+		}
+		CursorFollowTime = 0.f;
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(const FGameplayTag InputTag)
 {
-	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) || IsTargeting())
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) || bPressedTarget)
 	{
 		if (UAuraAbilitySystemComponent* ASC = GetASC())
 			ASC->AbilityInputTagHeld(InputTag);
 	}
 	else
 	{
-		MouseFollowTime += GetWorld()->GetDeltaSeconds();
+		CursorFollowTime += GetWorld()->GetDeltaSeconds();
 
 		FHitResult CursorHit;
 		if (GetHitResultUnderCursor(ECC_Visibility, false, CursorHit))
 		{
-			CachedDestination = CursorHit.ImpactPoint;
+			CursorFollowDestination = CursorHit.ImpactPoint;
 		}
 
 		if (APawn* ControlledPawn = GetPawn<APawn>())
 		{
-			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+			const FVector WorldDirection = (CursorFollowDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
 			ControlledPawn->AddMovementInput(WorldDirection);
 		}
 	}
-}
-
- bool AAuraPlayerController::IsTargeting() const
-{
-	return CurrentHightlightable != nullptr;
 }
 
 UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
