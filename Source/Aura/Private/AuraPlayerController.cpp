@@ -25,6 +25,8 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	CursorTrace();
+
+	AutoRun();
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -74,7 +76,6 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 void AAuraPlayerController::CursorTrace()
 {
-	FHitResult CursorHit;
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit)
 		return;
@@ -85,15 +86,11 @@ void AAuraPlayerController::CursorTrace()
 
 	if (PreviousHightlightable == CurrentHightlightable)
 		return;
-	if (PreviousHightlightable == nullptr && CurrentHightlightable != nullptr)
+	
+	if (CurrentHightlightable != nullptr)
 		CurrentHightlightable->Highlight();
-	else if (PreviousHightlightable != nullptr && CurrentHightlightable == nullptr)
+	if (PreviousHightlightable != nullptr)
 		PreviousHightlightable->UnHighlight();
-	else if (PreviousHightlightable != nullptr && CurrentHightlightable != nullptr)
-	{
-		PreviousHightlightable->UnHighlight();
-		CurrentHightlightable->Highlight();
-	}
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(const FGameplayTag InputTag)
@@ -123,8 +120,9 @@ void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 				for (const FVector& PathPoint : NavPath->PathPoints)
 				{
 					CursorFollowSpline->AddSplinePoint(PathPoint, ESplineCoordinateSpace::World);
-					DrawDebugSphere(GetWorld(), PathPoint, 8.f, 8, FColor::Green, false, 5.f);
 				}
+				if (!NavPath->PathPoints.IsEmpty())
+					CursorFollowDestination = NavPath->PathPoints.Last();
 				bAutoRunning = true;
 			}
 		}
@@ -143,16 +141,32 @@ void AAuraPlayerController::AbilityInputTagHeld(const FGameplayTag InputTag)
 	{
 		CursorFollowTime += GetWorld()->GetDeltaSeconds();
 
-		FHitResult CursorHit;
-		if (GetHitResultUnderCursor(ECC_Visibility, false, CursorHit))
-		{
+		if (CursorHit.bBlockingHit)
 			CursorFollowDestination = CursorHit.ImpactPoint;
-		}
 
 		if (APawn* ControlledPawn = GetPawn<APawn>())
 		{
 			const FVector WorldDirection = (CursorFollowDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
 			ControlledPawn->AddMovementInput(WorldDirection);
+		}
+	}
+}
+
+void AAuraPlayerController::AutoRun()
+{
+	if (!bAutoRunning)
+		return;
+	
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		const FVector LocationOnSpline = CursorFollowSpline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(),ESplineCoordinateSpace::World);
+		const FVector Direction = CursorFollowSpline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		ControlledPawn->AddMovementInput(Direction);
+
+		const float DistanceToDestination = (CursorFollowDestination - LocationOnSpline).Length();
+		if (DistanceToDestination < AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;	
 		}
 	}
 }

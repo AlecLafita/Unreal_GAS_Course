@@ -42,12 +42,15 @@ private:
 
 	void CursorTrace();
 
+	FHitResult CursorHit;
 	TScriptInterface<IHighlightable> PreviousHightlightable = nullptr;
 	TScriptInterface<IHighlightable> CurrentHightlightable = nullptr;
 
 	void AbilityInputTagPressed(const FGameplayTag InputTag);
 	void AbilityInputTagReleased(const FGameplayTag InputTag);
 	void AbilityInputTagHeld(const FGameplayTag InputTag);
+
+	void AutoRun();
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputConfig> InputConfig;
