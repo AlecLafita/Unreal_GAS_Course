@@ -41,6 +41,12 @@ void ACharacterBase::PostInitializeComponents()
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+FVector ACharacterBase::GetCombatSocketLocation() const
+{
+	check(Weapon);
+	return Weapon->GetSocketLocation(WeaponTipSocketName);
+}
+
 void ACharacterBase::InitializeDefaultAttributes() const
 {
 	ApplEffectToSelf(DefaultPrimaryAttributes, 1.f);
