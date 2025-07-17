@@ -13,14 +13,22 @@ UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(UGamepl
 
 void UTargetDataUnderMouse::Activate()
 {
-	const bool bIsLocallyControlled = Ability->GetCurrentActorInfo()->IsLocallyControlled();
-	if (bIsLocallyControlled)
+	if (const bool bIsLocallyControlled = Ability->GetCurrentActorInfo()->IsLocallyControlled())
 	{
 		SendMouseCursorData();
 	}
 	else
 	{
-		//TODO Listen to Target data sent
+		const FGameplayAbilitySpecHandle SpecHandle = GetAbilitySpecHandle();
+		const FPredictionKey ActivationPredictionKey = GetActivationPredictionKey();
+		//Listen to data replication
+		AbilitySystemComponent.Get()->AbilityTargetDataSetDelegate(SpecHandle, ActivationPredictionKey).AddUObject(this, &UTargetDataUnderMouse::OnTargetDataReplicatedCallback);
+		//Task activation replication could arrive after data replication arrives, so we need to broadcast it arriving again. If it hasn't arrived, we'll just wait for it 
+		const bool bCalledDelegate = AbilitySystemComponent.Get()->CallReplicatedTargetDataDelegatesIfSet(SpecHandle, ActivationPredictionKey);
+		if (!bCalledDelegate)
+		{
+			SetWaitingOnRemotePlayerData();
+		}
 	}
 }
 
@@ -42,8 +50,16 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 		GetAbilitySpecHandle(),
 		GetActivationPredictionKey(),
 		DataHandle,
-		FGameplayTag(),
+		FGameplayTag(), //No need for specific tag in this case
 		AbilitySystemComponent->ScopedPredictionKey);
+
+	if (ShouldBroadcastAbilityTaskDelegates()) //Should be checked always before broadcasting data!
+		ValidData.Broadcast(DataHandle);
+}
+
+void UTargetDataUnderMouse::OnTargetDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle, FGameplayTag ActivationTag)
+{
+	AbilitySystemComponent->ConsumeClientReplicatedTargetData(GetAbilitySpecHandle(), GetActivationPredictionKey()); //Notify ASC that we received it and we don't need to cache it anymore
 
 	if (ShouldBroadcastAbilityTaskDelegates()) //Should be checked always before broadcasting data!
 		ValidData.Broadcast(DataHandle);

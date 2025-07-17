@@ -16,4 +16,7 @@ void UAuraAssetManager::StartInitialLoading()
 	Super::StartInitialLoading();
 
 	FAuraGameplayTags::InitializeNativeGameplayTags();
+
+	//Apparently this is no longer needed from 5.3 on https://github.com/tranek/GASDocumentation?tab=readme-ov-file#491-initglobaldata
+	//UAbilitySystemGlobals::Get().InitGlobalData(); //Needed for use TargetData for replication! Otherwise cache won't be initialized and everything will be fucked up when trying to access it
 }
