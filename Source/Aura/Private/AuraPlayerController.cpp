@@ -55,6 +55,8 @@ void AAuraPlayerController::SetupInputComponent()
 
 	UBaseEnhancedInputComponent* EnhancedInputComponent = CastChecked<UBaseEnhancedInputComponent>(InputComponent);
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered,this, &AAuraPlayerController::Move);
+	EnhancedInputComponent->BindAction(ShiftAction, ETriggerEvent::Started,this, &AAuraPlayerController::OnShiftPressed);
+	EnhancedInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed,this, &AAuraPlayerController::OnShiftReleased);
 	EnhancedInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 
@@ -104,12 +106,7 @@ void AAuraPlayerController::AbilityInputTagPressed(const FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 {
-	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) || bPressedTarget)
-	{
-		if (UAuraAbilitySystemComponent* ASC = GetASC())
-			ASC->AbilityInputTagReleased(InputTag);
-	}
-	else
+	if (CanMoveFromInput(InputTag))
 	{
 		const APawn* ControlledPawn = GetPawn<APawn>();
 		if (CursorFollowTime <= ShortPressThreshold && ControlledPawn)
@@ -128,16 +125,16 @@ void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 		}
 		CursorFollowTime = 0.f;
 	}
+	else
+	{
+		if (UAuraAbilitySystemComponent* ASC = GetASC())
+			ASC->AbilityInputTagReleased(InputTag);
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(const FGameplayTag InputTag)
 {
-	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) || bPressedTarget)
-	{
-		if (UAuraAbilitySystemComponent* ASC = GetASC())
-			ASC->AbilityInputTagHeld(InputTag);
-	}
-	else
+	if (CanMoveFromInput(InputTag))
 	{
 		CursorFollowTime += GetWorld()->GetDeltaSeconds();
 
@@ -149,6 +146,11 @@ void AAuraPlayerController::AbilityInputTagHeld(const FGameplayTag InputTag)
 			const FVector WorldDirection = (CursorFollowDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
 			ControlledPawn->AddMovementInput(WorldDirection);
 		}
+	}
+	else
+	{
+		if (UAuraAbilitySystemComponent* ASC = GetASC())
+			ASC->AbilityInputTagHeld(InputTag);
 	}
 }
 
@@ -179,4 +181,9 @@ UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 	}
 
 	return AuraAbilitySystemComponent;
+}
+
+const bool AAuraPlayerController::CanMoveFromInput(const FGameplayTag InputTag) const
+{
+	return InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) && !bPressedTarget && !bShiftKeyDown;
 }

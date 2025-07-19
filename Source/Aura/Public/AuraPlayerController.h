@@ -38,6 +38,12 @@ private:
 	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputAction> MoveAction;
 
+	UPROPERTY(EditAnywhere, Category="Input")
+	TObjectPtr<UInputAction> ShiftAction;
+
+	void OnShiftPressed() {bShiftKeyDown = true;}
+	void OnShiftReleased() {bShiftKeyDown = false;}
+	
 	void Move(const FInputActionValue& InputActionValue);
 
 	void CursorTrace();
@@ -67,7 +73,10 @@ private:
 
 	bool bPressedTarget = false;
 	bool bAutoRunning = false;
+	bool bShiftKeyDown = false;
 
+	const bool CanMoveFromInput(const FGameplayTag InputTag) const;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	float AutoRunAcceptanceRadius = 50.f;
 
