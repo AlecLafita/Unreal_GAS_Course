@@ -7,7 +7,7 @@
 #include "CombatInterface.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, BlueprintType) //BlueprintType to be able to cast to it
 class UCombatInterface : public UInterface
 {
 	GENERATED_BODY()
@@ -26,4 +26,7 @@ public:
 	virtual int32 GetCombatLevel() const { return 0; }
 
 	virtual FVector GetCombatSocketLocation() const { return FVector::ZeroVector; }
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="CombatInterface")
+	void SetWrapFacingTarget(const FVector& Target);
 };
