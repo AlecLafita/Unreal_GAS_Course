@@ -5,6 +5,9 @@
 
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Components/AudioComponent.h"
 
 AProjectile::AProjectile()
 {
@@ -19,6 +22,8 @@ AProjectile::AProjectile()
 	SphereComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
 	SphereComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
+	AudioLoopComponent = CreateDefaultSubobject<UAudioComponent>("AudioComponent");
+	
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
 	ProjectileMovementComponent->InitialSpeed = 550.f; //TODO expose all of this
 	ProjectileMovementComponent->MaxSpeed = 550.f;
@@ -28,10 +33,35 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	SetLifeSpan(LifeSpan);
 	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnSphereOverlap);
 }
 
-void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AProjectile::Destroyed()
 {
+	if (!bHit && !HasAuthority())//In case server replication reaches before client actually hit, at least play effects
+		PlayImpact();
+	
+	Super::Destroyed();
+}
+
+void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                  UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor == GetInstigator())
+		return;
+
+	PlayImpact();
+
+	if (HasAuthority())
+		Destroy();
+
+	bHit = true;
+}
+
+void AProjectile::PlayImpact() const
+{
+	AudioLoopComponent->Stop();
+	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 }
