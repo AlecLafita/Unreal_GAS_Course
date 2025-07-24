@@ -106,7 +106,10 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 	//Need to clamp again to actually apply the clamp to the attribute final values
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	{
 		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
+		UE_LOG(LogTemp, Warning, TEXT("Changed Health on %s, Health: %f"), *EffectProperties.TargetInfo.AvatarActor->GetName(), GetHealth());
+	}
 	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 }

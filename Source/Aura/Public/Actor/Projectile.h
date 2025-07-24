@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffectTypes.h"
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
@@ -31,6 +32,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
 
+	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn="true"))
+	FGameplayEffectSpecHandle DamageEffectSpecHandle; 
+	
 private:
 
 	UPROPERTY(EditAnywhere)
