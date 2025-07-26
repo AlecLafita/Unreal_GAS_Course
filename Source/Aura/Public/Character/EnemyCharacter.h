@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "Character/CharacterBase.h"
 #include "Interaction/Highlightable.h"
+#include "UI/WisgetController/OverlayWidgetController.h"//TODO move attribute changed signature to a common types file
 #include "EnemyCharacter.generated.h"
+
+class UWidgetComponent;
 
 /**
  * 
@@ -27,6 +30,12 @@ public:
 	virtual int32 GetCombatLevel() const override {return Level;}
 	/* ~ICombatInterface */
 
+	UPROPERTY(BlueprintAssignable)
+	FOnFloatAttributeChangedSignature OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFloatAttributeChangedSignature OnMaxHealthChanged;
+	
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
@@ -34,4 +43,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly,	Category = "Catergory Class Defaults")
 	int32 Level = 1; //Don't replicate until we  it on client side
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UWidgetComponent> HealthBarComponent;
 };

@@ -6,6 +6,9 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Aura/Aura.h"
+#include "Chaos/Deformable/MuscleActivationConstraints.h"
+#include "Components/WidgetComponent.h"
+#include "UI/Widget/BaseUserWidget.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -16,6 +19,9 @@ AEnemyCharacter::AEnemyCharacter()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);//Enemies don't need to have effects replicated as no player is controlling them 
 
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>("AttributeSet");
+
+	HealthBarComponent = CreateDefaultSubobject<UWidgetComponent>("HealthBarComponent");
+	HealthBarComponent->SetupAttachment(GetRootComponent());
 }
 
 void AEnemyCharacter::Highlight()
@@ -42,6 +48,29 @@ void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	InitAbilityActorInfo();
+
+	if (UBaseUserWidget* HealthBarWidgetObject = Cast<UBaseUserWidget>(HealthBarComponent->GetUserWidgetObject()))
+	{
+		HealthBarWidgetObject->SetWidgetController(this);
+	}
+	
+	if (const UAuraAttributeSet* AuraAS = CastChecked<UAuraAttributeSet>(AttributeSet))
+	{
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAS->GetHealthAttribute()).AddLambda(
+		[this](const FOnAttributeChangeData& Data)
+		{
+			OnHealthChanged.Broadcast(Data.NewValue);
+		});
+
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAS->GetMaxHealthAttribute()).AddLambda(
+		[this](const FOnAttributeChangeData& Data)
+		{
+			OnMaxHealthChanged.Broadcast(Data.NewValue);
+		});
+
+		OnHealthChanged.Broadcast(AuraAS->GetHealth());
+		OnMaxHealthChanged.Broadcast(AuraAS->GetMaxHealth());
+	}
 }
 
 void AEnemyCharacter::InitAbilityActorInfo()
