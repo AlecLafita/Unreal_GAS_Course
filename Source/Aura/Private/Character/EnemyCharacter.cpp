@@ -53,6 +53,8 @@ void AEnemyCharacter::BeginPlay()
 	{
 		HealthBarWidgetObject->SetWidgetController(this);
 	}
+
+	const FWidgetControllerParams WCParams(nullptr, nullptr, AbilitySystemComponent, AttributeSet);
 	
 	if (const UAuraAttributeSet* AuraAS = CastChecked<UAuraAttributeSet>(AttributeSet))
 	{
